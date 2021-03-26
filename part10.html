@@ -41,8 +41,11 @@ var score = 0;
 var gameOver = false;
 var scoreText;
 var run = true;
-var attack = true;
-var canJump = true;
+var attack = false;
+var gun;
+var boutonTir;
+var groupeBullets;
+
 
 
 var game = new Phaser.Game(config);
@@ -54,6 +57,9 @@ function preload ()
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/perso.png', { frameWidth: 40, frameHeight: 60 });
+    this.load.image('gun', 'assets/pistolet.png');
+    this.load.image('laser', 'assets/laser.png');
+
 }
 
 function create ()
@@ -83,12 +89,14 @@ function create ()
 
    
 
-    // The player and its settings -- Ici correspond au positionnement de l'avatar quand 
+    // The player and its settings -- Ici correspond au positionnement de l'avatar
     player = this.physics.add.sprite(50, 3100, 'dude');
 
     //  Player physics properties. Give the little guy a slight bounce.
+    player.direction='right';
     player.setBounce(0);
     player.setCollideWorldBounds(true);
+
 
     //  Our player animations, turning, walking left and walking right.
     this.anims.create({
@@ -100,16 +108,10 @@ function create ()
 
     this.anims.create({
         key: 'turn',
-        frames: [ { key: 'dude', frame: 4 } ],
+        frames: [ { key: 'dude', frame:4} ],
         frameRate: 20
     });
-    
-    this.anims.create({
-        key: 'jump',
-        frames : this.anims.generateFrameNumbers('dude', {start: 32, end: 32 }),
-        frameRate: 10,
-    });
-    
+     
 
     this.anims.create({
         key: 'right',
@@ -117,9 +119,29 @@ function create ()
         frameRate: 5,
         repeat: -1
     });
+    
+    this.anims.create({
+        key: 'jump_right',
+        //frames : this.anims.generateFrameNumbers('dude', {start: 30, end: 32}),
+        frames: [{ key: 'dude', frame: 32}],
+        frameRate: 10,
+        repeat: 1 
+    });
+    
+    this.anims.create({
+        key: 'jump_left',
+        //frames : this.anims.generateFrameNumbers('dude', {start: 30, end: 32}),
+        frames: [{ key: 'dude', frame: 23}],
+        frameRate: 10,
+        repeat: 1 
+    });
+    
 
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
+    boutonTir = this.input.keyboard.addKey('A');
+
+    groupeBullets = this.physics.add.group();
 
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     stars = this.physics.add.group({
@@ -137,6 +159,16 @@ function create ()
 
     bombs = this.physics.add.group();
 
+    gun = this.physics.add.group({
+        key: 'gun',
+        repeat: 0,
+        setXY: {x:170,y:3150}
+    });
+       
+
+
+
+
     //  The score
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
@@ -144,11 +176,15 @@ function create ()
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(gun, platforms);
 
+    this.physics.add.overlap(player, gun, getGun, null, this);
+ 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
+
 
     this.cameras.main.setBounds (0, 0, 3200, 3200);
     this.cameras.main.setSize (1080,720);
@@ -166,22 +202,19 @@ function update ()
 
     if (cursors.left.isDown)
     {
+        player.direction='left';
         player.setVelocityX(-160);
 
         player.anims.play('left', true);
     }
     else if (cursors.right.isDown)
     {
+        player.direction='right';
         player.setVelocityX(160);
 
         player.anims.play('right', true);
     }
-    else if (cursors.up.isDown && player.body.touching.down && canJump = true)
-    {
-        player.setVelocityY(-330);
-        player.anims.play('jump', true);
-        canJump = false;
-    }
+
     else
     {
         player.setVelocityX(0);
@@ -189,7 +222,46 @@ function update ()
         player.anims.play('turn');
     }
 
+    if (cursors.up.isDown && player.body.touching.down)
+    {
+        player.setVelocityY(-330);
+        player.anims.play('jump');
+    }
+    
+    if(cursors.up.isUp && !player.body.touching.down && player.direction == 'right')
+        {
+            player.anims.play('jump_right');
+        }
+
+    if (cursors.up.isUp && !player.body.touching.down && player.direction == 'left')
+        {
+            player.anims.play('jump_left');
+        }
+    
+    if (Phaser.Input.Keyboard.JustDown(boutonTir)){
+            if(attack==true){
+            shot(player);
+        }
+    }
 }
+
+function getGun (player, gun)
+{   
+    gun.disableBody(true, true);
+    attack=true;
+}
+
+function shot(player){
+    var coefDir;
+    if (player.direction == 'left') { coefDir = -1; } else { coefDir = 1 }
+        // on crée la balle a coté du joueur
+    var bullet = groupeBullets.create(player.x + (25 * coefDir), player.y - 4, 'laser');
+         // parametres physiques de la balle.
+    bullet.setCollideWorldBounds(false);
+    bullet.body.allowGravity =false;
+    bullet.setVelocity(1000 * coefDir, 0); // vitesse en x et en y
+}
+
 
 function collectStar (player, star)
 {
