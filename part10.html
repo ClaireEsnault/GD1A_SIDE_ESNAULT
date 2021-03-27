@@ -53,13 +53,16 @@ var game = new Phaser.Game(config);
 function preload ()
 {
     this.load.image('sky', 'assets/Fond.png');
-    this.load.image('ground', 'assets/platform.png');
+    this.load.image('ground', 'assets/ground.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/perso.png', { frameWidth: 40, frameHeight: 60 });
     this.load.image('gun', 'assets/pistolet.png');
     this.load.image('laser', 'assets/laser.png');
     this.load.image('ours', 'assets/ours.png');
+    this.load.image('ice','assets/ice.png');
+    this.load.image('snow', 'assets/neige.png');
+    this.load.image('snow2', 'assets/neige2.png');
 }
 
 function create ()
@@ -73,19 +76,23 @@ function create ()
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 3200, 'ground').setScale(2).refreshBody();
+    platforms.create(0,3200, 'ground').setScale(1).refreshBody();
+
+    platforms.create(500,3000, 'ice');
+    platforms.create(300,3100, 'snow');
+    
 
     //  Now let's create some ledges
-    platforms.create(600, 400, 'ground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
-    platforms.create (1150, 3100, 'ground');
-    platforms.create (600, 3000, 'ground');
-    platforms.create (1150, 2950, 'ground');
-    platforms.create (600, 2850, 'ground');
-    platforms.create (1150, 2750, 'ground');
-    platforms.create (600, 2650, 'ground');
-    platforms.create (1150, 2550, 'ground');
+ // platforms.create(600, 400, 'ground');
+//  platforms.create(50, 250, 'ground');
+//  platforms.create(750, 220, 'ground');
+//  platforms.create (1150, 3100, 'ground');
+//  platforms.create (600, 3000, 'ground');
+//  platforms.create (1150, 2950, 'ground');
+//  platforms.create (600, 2850, 'ground');
+//  platforms.create (1150, 2750, 'ground');
+//  platforms.create (600, 2650, 'ground');
+//  platforms.create (1150, 2550, 'ground');
 
    
 
@@ -167,7 +174,7 @@ function create ()
     gun = this.physics.add.group({
         key: 'gun',
         repeat: 0,
-        setXY: {x:170,y:3150}
+        setXY: {x:170,y:3100}
     });
        
 
