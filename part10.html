@@ -59,7 +59,7 @@ function preload ()
     this.load.spritesheet('dude', 'assets/perso.png', { frameWidth: 40, frameHeight: 60 });
     this.load.image('gun', 'assets/pistolet.png');
     this.load.image('laser', 'assets/laser.png');
-
+    this.load.image('ours', 'assets/ours.png');
 }
 
 function create ()
@@ -136,6 +136,11 @@ function create ()
         repeat: 1 
     });
     
+    ours = this.physics.add.group({
+        key: 'ours',
+        repeat: 0,
+        setXY: {x:450,y:2000}
+    })
 
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
@@ -167,8 +172,6 @@ function create ()
        
 
 
-
-
     //  The score
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
@@ -177,6 +180,7 @@ function create ()
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(bombs, platforms);
     this.physics.add.collider(gun, platforms);
+    this.physics.add.collider(ours, platforms);
 
     this.physics.add.overlap(player, gun, getGun, null, this);
  
