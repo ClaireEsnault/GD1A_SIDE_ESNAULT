@@ -22,7 +22,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 500 },
-            debug: true
+            debug: false
         }
     },
     scene: {
@@ -67,7 +67,7 @@ function preload ()
     this.load.image('black', 'assets/snowBlack.png');
     this.load.image('leftWall', 'assets/leftWall.png');
     this.load.image('rightWall', 'assets/rightWall.png');
-    this.load.image('midWall', 'assets/midwall.png');
+    this.load.image('midWall', 'assets/midwall5.png');
 }
 
 function create ()
@@ -86,6 +86,7 @@ function create ()
     platforms.create(800,3065, 'platform').setScale(0.5).refreshBody();
     platforms.create(1300,2960, 'platform').setScale(0.5).refreshBody();
     platforms.create(1600,2960, 'platform').setScale(0.5).refreshBody();
+    platforms.create(1000,3114, 'midWall').setScale(1).refreshBody();
 
 
     
