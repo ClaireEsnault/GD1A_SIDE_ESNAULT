@@ -52,17 +52,22 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-    this.load.image('sky', 'assets/Fond.png');
+    this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/ground.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
-    this.load.spritesheet('dude', 'assets/perso.png', { frameWidth: 40, frameHeight: 60 });
-    this.load.image('gun', 'assets/pistolet.png');
-    this.load.image('laser', 'assets/laser.png');
-    this.load.image('ours', 'assets/ours.png');
+    this.load.spritesheet('dude', 'assets/moutaineer.png', { frameWidth: 40, frameHeight: 60 });
+    this.load.image('gun', 'assets/gun.png');
+    this.load.image('snowball', 'assets/snowball.png');
+    this.load.image('ours', 'assets/bear.png');
     this.load.image('ice','assets/ice.png');
-    this.load.image('snow', 'assets/neige.png');
-    this.load.image('snow2', 'assets/neige2.png');
+    this.load.image('snow', 'assets/snow.png');
+    this.load.image('snowIce', 'assets/snowIce.png');
+    this.load.image('platform','assets/platform.png');
+    this.load.image('black', 'assets/snowBlack.png');
+    this.load.image('leftWall', 'assets/leftWall.png');
+    this.load.image('rightWall', 'assets/rightWall.png');
+    this.load.image('midWall', 'assets/midwall.png');
 }
 
 function create ()
@@ -76,10 +81,13 @@ function create ()
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(0,3200, 'ground').setScale(1).refreshBody();
+    platforms.create(1600,3200, 'ground').setScale(1).refreshBody();
 
-    platforms.create(500,3000, 'ice');
-    platforms.create(300,3100, 'snow');
+    platforms.create(800,3065, 'platform').setScale(0.5).refreshBody();
+    platforms.create(1300,2960, 'platform').setScale(0.5).refreshBody();
+    platforms.create(1600,2960, 'platform').setScale(0.5).refreshBody();
+
+
     
 
     //  Now let's create some ledges
@@ -266,11 +274,11 @@ function shot(player){
     var coefDir;
     if (player.direction == 'left') { coefDir = -1; } else { coefDir = 1 }
         // on crée la balle a coté du joueur
-    var bullet = groupeBullets.create(player.x + (25 * coefDir), player.y - 4, 'laser');
+    var bullet = groupeBullets.create(player.x + (25 * coefDir), player.y - 2, 'snowball');
          // parametres physiques de la balle.
     bullet.setCollideWorldBounds(false);
     bullet.body.allowGravity =false;
-    bullet.setVelocity(1000 * coefDir, 0); // vitesse en x et en y
+    bullet.setVelocity(500 * coefDir, 0); // vitesse en x et en y
 }
 
 
