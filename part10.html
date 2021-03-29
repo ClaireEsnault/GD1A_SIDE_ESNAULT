@@ -32,6 +32,8 @@ var config = {
     }
 };
 
+//Toutes les variables nécessaires :
+
 var player;
 var stars;
 var bombs;
@@ -46,9 +48,10 @@ var gun;
 var boutonTir;
 var groupeBullets;
 
-
-
 var game = new Phaser.Game(config);
+
+
+//Images et spritesheets nécessaires
 
 function preload ()
 {
@@ -64,57 +67,54 @@ function preload ()
     this.load.image('snow', 'assets/snow.png');
     this.load.image('snowIce', 'assets/snowIce.png');
     this.load.image('platform','assets/platform.png');
-    this.load.image('black', 'assets/snowBlack.png');
+    this.load.image('snowblack', 'assets/snowBlack.png');
     this.load.image('leftWall', 'assets/leftWall.png');
     this.load.image('rightWall', 'assets/rightWall.png');
-    this.load.image('midWall', 'assets/midwall5.png');
+    this.load.image('midWall', 'assets/midWall.png');
+    this.load.image('board', 'assets/board.png');
+    this.load.image('flag', 'assets/flag.png');
+    this.load.image('flake', 'assets/flake.png');
+    this.load.image('snowman', 'assets/snowman.png');
+    this.load.image('peak','assets/peak.png');
+    this.load.image('icePeak', 'assets/icePeak.png');
+    this.load.image('bigTree', 'assets/bigTree.png');
+    this.load.image('littleTree', 'assets/littleTree.png');
+
+
+
+
+
+
 }
 
 function create ()
 {
 
-    //  A simple background for our game
+    //  Fond d'écran du jeu
     this.add.image(1600, 1600, 'sky');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
+    //Le groupe contenant nos plateformes
     platforms = this.physics.add.staticGroup();
 
-    //  Here we create the ground.
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    //Création des plateformes 
+    //Le sol
     platforms.create(1600,3200, 'ground').setScale(1).refreshBody();
-
+    //les plateformes
     platforms.create(800,3065, 'platform').setScale(0.5).refreshBody();
     platforms.create(1300,2960, 'platform').setScale(0.5).refreshBody();
     platforms.create(1600,2960, 'platform').setScale(0.5).refreshBody();
     platforms.create(1000,3114, 'midWall').setScale(1).refreshBody();
 
-
-    
-
-    //  Now let's create some ledges
- // platforms.create(600, 400, 'ground');
-//  platforms.create(50, 250, 'ground');
-//  platforms.create(750, 220, 'ground');
-//  platforms.create (1150, 3100, 'ground');
-//  platforms.create (600, 3000, 'ground');
-//  platforms.create (1150, 2950, 'ground');
-//  platforms.create (600, 2850, 'ground');
-//  platforms.create (1150, 2750, 'ground');
-//  platforms.create (600, 2650, 'ground');
-//  platforms.create (1150, 2550, 'ground');
-
-   
-
-    // The player and its settings -- Ici correspond au positionnement de l'avatar
+    //Positionnement de l'avatar
     player = this.physics.add.sprite(50, 3100, 'dude');
 
-    //  Player physics properties. Give the little guy a slight bounce.
+    // Propriété de l'avatar
     player.direction='right';
     player.setBounce(0);
     player.setCollideWorldBounds(true);
 
 
-    //  Our player animations, turning, walking left and walking right.
+    // Animations de l'avatar...
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
@@ -136,6 +136,7 @@ function create ()
         repeat: -1
     });
     
+    //...Avec implémentation du saut
     this.anims.create({
         key: 'jump_right',
         //frames : this.anims.generateFrameNumbers('dude', {start: 30, end: 32}),
@@ -152,13 +153,14 @@ function create ()
         repeat: 1 
     });
     
+    //Placement du 1er ennemi à l'écran
     ours = this.physics.add.group({
         key: 'ours',
         repeat: 0,
         setXY: {x:450,y:2000}
     })
 
-    //  Input Events
+    // Contrôles
     cursors = this.input.keyboard.createCursorKeys();
     boutonTir = this.input.keyboard.addKey('A');
 
@@ -323,8 +325,6 @@ function hitBomb (player, bomb)
 }
 
 // Trouver le moyen d'ajouter une fonction qui provoque le game Over
-// quand le joueur "tombe" du décor
-
 </script>
 
 </body>
