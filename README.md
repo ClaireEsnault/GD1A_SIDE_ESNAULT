@@ -1,2 +1,2 @@
-# GD1A_SIDE_ESNAULT
+# Projet_Sidescroller
 Création d'un plateformer/sidescroller en utilisant Phaser
