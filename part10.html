@@ -38,7 +38,6 @@ var config = {
 var paddle;
 var paddleConnected = false;
 var player;
-var bombs;
 var platforms;
 var cursors;
 var score = 0;
@@ -95,10 +94,10 @@ function create ()
     //  Fond d'écran du jeu : 
     this.add.image(1600, 1600, 'sky');
 
-    //Le groupe contenant nos plateformes
-    platforms = this.physics.add.staticGroup();
+    //-----------------------------------------------------------------
 
     //Création des plateformes : 
+    platforms = this.physics.add.staticGroup();
     //Le sol
     platforms.create(1600,3200, 'ground').setScale(1).refreshBody();
     //les plateformes
@@ -115,24 +114,16 @@ function create ()
     icePlatforms = this.physics.add.staticGroup();
     icePlatforms.create (1000,2700, 'ice').setScale(0.5).refreshBody();
     
-
     //Les murs
     platforms.create(1000,3114, 'midWall').setScale(1).refreshBody();
     platforms.create(1752,3070, 'midWall').setScale(2).refreshBody();
-    
+    platforms.create(2100,3060, 'midWall').setScale(2).refreshBody();
 
+    //--------------------------------------------------------------------
+    
+    //--------AVATAR-------------
     //Positionnement de l'avatar : 
     player = this.physics.add.sprite(1000, 2500, 'dude');
-
-    //Placement du 1er ennemi à l'écran
-    ours = this.physics.add.group({
-        key: 'bear',
-        repeat: 0,
-        setXY: {x:450,y:2000}
-    })
-    
-    var ours1 = ours.create(450, 2000, 'bear');
-    
 
     // Propriété de l'avatar :
     player.direction='right';
@@ -193,6 +184,23 @@ function create ()
         repeat: 1
     });
     
+    //--------ENNEMIS/DANGERS-------------
+    //Les ours : 
+    ours = this.physics.add.group({
+        key: 'bear',
+        repeat: 0,
+        setXY: {x:450,y:2000}
+    })
+    
+    var ours1 = ours.create(450, 2000, 'bear');
+
+    //Les pics :
+    peak = this.physics.add.staticGroup({
+        key: 'peak',
+        repeat: 0,
+        setXY: {x:900, y:3040}
+    });
+    
    
 
     // Contrôles
@@ -206,12 +214,7 @@ function create ()
     //implémentation des panneaux
     this.add.image (165,3130,'board')
 
-    //implémentation des pics
-    peak = this.physics.add.staticGroup({
-        key: 'peak',
-        repeat: 0,
-        setXY: {x:900, y:3040}
-    });
+   
 
     //utilisation du pistolet à neige
     gun = this.physics.add.group({
@@ -264,6 +267,10 @@ function create ()
     
 }
 
+
+//--------------------------------------------------------------------------------
+
+
 function update ()
 {
     if (gameOver)
@@ -281,6 +288,13 @@ function update ()
             player.setVelocityX(160);
             var wallTime=50;
             player.anims.play('wallJump_left');
+        }
+    else if (cursors.up.isUp && !player.body.touching.down && player.direction == 'right' && player.body.blocked.right)
+        {
+            player.setVelocityY(380);
+            player.setVelocityX(160);
+            var wallTime=50;
+            player.anims.play('wallJump_right');
         }
 
     else if (cursors.up.isDown && player.body.touching.down)
@@ -366,7 +380,6 @@ function update ()
                 player.direction='right';
             }
 
-
             else {
                 player.setVelocityX(0);
                 player.setAccelerationX(0);
@@ -406,8 +419,11 @@ function update ()
     }
 
    scoreText.setText(movment); 
-   
-    // Contrôles manettes 
+
+   //-----------------------------------------------------------------------------
+
+   //---------CONTROLES--------------
+   // Contrôles manettes 
     
     this.input.gamepad.once('connected', function (pad) {
     //   'pad' is a reference to the gamepad that was just connected
