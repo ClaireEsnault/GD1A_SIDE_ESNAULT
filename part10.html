@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
-    <title>Making your first Phaser 3 Game - Part 10</title>
+    <title>A Fresh Hike</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
     <style type="text/css">
         body {
@@ -25,6 +25,7 @@ var config = {
             debug: true
         }
     },
+    input:{gamepad:true},
     scene: {
         preload: preload,
         create: create,
@@ -34,6 +35,8 @@ var config = {
 
 //Toutes les variables nécessaires :
 
+var paddle;
+var paddleConnected = false;
 var player;
 var bombs;
 var platforms;
@@ -62,7 +65,6 @@ function preload ()
 {
     this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/ground.png');
-    this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/moutaineer.png', { frameWidth: 40, frameHeight: 60 });
     this.load.image('gun', 'assets/gun.png');
     this.load.image('snowball', 'assets/snowball.png');
@@ -104,10 +106,12 @@ function create ()
     platforms.create(1300,2960, 'platform').setScale(0.5).refreshBody();
     platforms.create(1600,2960, 'platform').setScale(0.5).refreshBody();
 
+
+    //Les plateformes de neige :
     snowPlatforms = this.physics.add.staticGroup();
-    
     snowPlatforms.create (1100,2860, 'snow').setScale(0.5).refreshBody();
 
+    //Les plateformes de glace :
     icePlatforms = this.physics.add.staticGroup();
     icePlatforms.create (1000,2700, 'ice').setScale(0.5).refreshBody();
     
@@ -126,6 +130,9 @@ function create ()
         repeat: 0,
         setXY: {x:450,y:2000}
     })
+    
+    var ours1 = ours.create(450, 2000, 'bear');
+    
 
     // Propriété de l'avatar :
     player.direction='right';
@@ -231,7 +238,8 @@ function create ()
     this.physics.add.overlap(player, peak, getDead, null, this);
     this.physics.add.overlap(player, ours, getDamage, null, this);
     this.physics.add.overlap(player, gun, getGun, null, this);
- 
+    this.physics.add.overlap(groupeBullets, ours, hitOurs, null, this);
+    this.physics.add.overlap(groupeBullets, platforms, hitWall, null, this);
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
@@ -241,7 +249,19 @@ function create ()
     this.cameras.main.setSize (1280,720);
     this.cameras.main.startFollow (player);
 
-
+    //Ours qui bouge
+    var tween = this.tweens.add({
+        targets: ours1,
+        x: 50,
+        duration: 5000,
+        yoyo: true,
+        repeat: -1,
+        onStart: function () { console.log('onStart'); console.log(arguments); },
+        onComplete: function () { console.log('onComplete'); console.log(arguments); },
+        onYoyo: function () { console.log('onYoyo'); console.log(arguments); },
+        onRepeat: function () { console.log('onRepeat'); console.log(arguments); },
+    });
+    
 }
 
 function update ()
@@ -387,7 +407,58 @@ function update ()
 
    scoreText.setText(movment); 
    
+    // Contrôles manettes 
+    
+    this.input.gamepad.once('connected', function (pad) {
+    //   'pad' is a reference to the gamepad that was just connected
+    paddleConnected = true;
+    paddle = pad;
+    });
+
+    if (paddleConnected == true)
+    {
+        if (paddle.A && player.body.touching.down)
+        {
+        player.setVelocityY(-330);
+        }
+
+        else if (paddle.R2 && player.body.touching.down)
+        {
+            player.direction = 'right';
+            player.setVelocityX(160);
+            player.anims.play('right', true);
+        }
+
+        else if (paddle.R2 && !player.body.touching.down)
+        {
+            player.direction = 'right';
+            player.setVelocityX(160);
+            player.anims.play('rightjump', true);
+        }
+
+        else if (paddle.L2 && player.body.touching.down)
+        {
+            player.direction = 'left';
+            player.setVelocityX(-160);
+            player.anims.play('left', true);
+        }
+
+        else if (paddle.L2 && !player.body.touching.down)
+        {
+            player.direction = 'left';
+            player.setVelocityX(-160);
+            player.anims.play('leftjump', true);
+        }
+
+        if (paddle.B){
+            if(attack == true){
+            shot(player);
+            }
+        }
+
+    }
 }
+    
 function getDamage (player, ours)
 {  
     if (!invincible)
@@ -445,6 +516,16 @@ function getGround (player, platforms)
 {
     movment=0;
 }
+
+function hitOurs(ours, bullet){
+    ours.destroy();
+    bullet.destroy();
+}
+    
+function hitWall(bullet, platforms){
+    bullet.destroy();
+}
+    
 </script>
 
 </body>
