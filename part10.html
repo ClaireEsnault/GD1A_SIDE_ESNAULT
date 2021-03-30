@@ -35,7 +35,6 @@ var config = {
 //Toutes les variables nécessaires :
 
 var player;
-var stars;
 var bombs;
 var platforms;
 var cursors;
@@ -50,6 +49,8 @@ var wallTime = 0;
 var hp;
 var health = 3;
 var invincible = false;
+var peak;
+var movment = 0;
 
     
 var game = new Phaser.Game(config);
@@ -61,7 +62,6 @@ function preload ()
 {
     this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/ground.png');
-    this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/moutaineer.png', { frameWidth: 40, frameHeight: 60 });
     this.load.image('gun', 'assets/gun.png');
@@ -103,13 +103,22 @@ function create ()
     platforms.create(800,3065, 'platform').setScale(0.5).refreshBody();
     platforms.create(1300,2960, 'platform').setScale(0.5).refreshBody();
     platforms.create(1600,2960, 'platform').setScale(0.5).refreshBody();
+
+    snowPlatforms = this.physics.add.staticGroup();
+    
+    snowPlatforms.create (1100,2860, 'snow').setScale(0.5).refreshBody();
+
+    icePlatforms = this.physics.add.staticGroup();
+    icePlatforms.create (1000,2700, 'ice').setScale(0.5).refreshBody();
+    
+
     //Les murs
     platforms.create(1000,3114, 'midWall').setScale(1).refreshBody();
     platforms.create(1752,3070, 'midWall').setScale(2).refreshBody();
     
 
     //Positionnement de l'avatar : 
-    player = this.physics.add.sprite(50, 3100, 'dude');
+    player = this.physics.add.sprite(1000, 2500, 'dude');
 
     //Placement du 1er ennemi à l'écran
     ours = this.physics.add.group({
@@ -185,51 +194,45 @@ function create ()
 
     groupeBullets = this.physics.add.group();
 
-    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-        key: 'star',
-        repeat: 11,
-        setXY: { x: 12, y: 0, stepX:60 }
-    });
-
-    stars.children.iterate(function (child) {
-
-        //  Give each star a slightly different bounce
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
-    });
-
     bombs = this.physics.add.group();
 
     //implémentation des panneaux
-    this.add.image (165,3100'board');
+    this.add.image (165,3130,'board')
+
+    //implémentation des pics
+    peak = this.physics.add.staticGroup({
+        key: 'peak',
+        repeat: 0,
+        setXY: {x:900, y:3040}
+    });
 
     //utilisation du pistolet à neige
     gun = this.physics.add.group({
         key: 'gun',
         repeat: 0,
-        setXY: {x:170,y:3100}
+        setXY: {x:200,y:3100}
     });tempsInvulerable = this.time.addEvent({ delay: 2000, callback: function(){invulnerable = false;}, callbackScope: this});tempsInvulerable = this.time.addEvent({ delay: 2000, callback: function(){invulnerable = false;}, callbackScope: this});
        
     //jauge de vie
     hp = this.add.image(1150,50,'flag3').setScrollFactor(0);
 
     //  The score
-    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' }).setScrollFactor(0);
 
     //Interaction entre les différents éléments:
-    this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(player, platforms,getGround);
     this.physics.add.collider(bombs, platforms);
     this.physics.add.collider(gun, platforms);
     this.physics.add.collider(ours, platforms);
+    this.physics.add.collider(peak, platforms);
+    this.physics.add.collider(player, snowPlatforms, getSnowy);
+    this.physics.add.collider(player, icePlatforms, getIcy);
 
-
+    this.physics.add.overlap(player, peak, getDead, null, this);
     this.physics.add.overlap(player, ours, getDamage, null, this);
     this.physics.add.overlap(player, gun, getGun, null, this);
  
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    this.physics.add.overlap(player, stars, collectStar, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 
@@ -280,25 +283,83 @@ function update ()
 
     else if (cursors.left.isDown)
     {
+        if (movment ==1)
+        {
+        player.direction='left';
+        player.setVelocityX(-80);
+        player.anims.play('left', true);
+        }
+        else if (movment ==2)
+        {
+        player.direction='left';
+        player.setAccelerationX(-80);
+        player.anims.play('left', true);  
+        }
+        else
+        {
         player.direction='left';
         player.setVelocityX(-160);
-        
 
         player.anims.play('left', true);
+        }
+  
+
+        
     }
     else if (cursors.right.isDown)
     {
+        if (movment ==1)
+        {
+        player.direction='right';
+        player.setVelocityX(80);
+        player.anims.play('right', true);
+        }
+        else if (movment ==2)
+        {
+        player.direction='right';
+        player.setAccelerationX(80);
+        player.anims.play('right', true);  
+        }
+        else
+        {
         player.direction='right';
         player.setVelocityX(160);
-
+        
         player.anims.play('right', true);
+        }
+
     }
 
     else
         {
-            player.setVelocityX(0);
+        if (movment==2)
+        {
+            if(player.body.velocity.x < 0){
+                player.setAccelerationX(100);
+                player.anims.play('left');
+                player.direction='left';
+            }
+
+            else if(player.body.velocity.x > 0) {
+                player.setAccelerationX(-100);
+                player.anims.play('right');
+                player.direction='right';
+            }
+
+
+            else {
+                player.setVelocityX(0);
+                player.setAccelerationX(0);
+                player.anims.play('turn');
+            }
+        }
+        else 
+        {
+            player.setVelocityX(0)
+            player.setAccelerationX(0);
             player.anims.play('turn');
         }
+    }
 
     if (Phaser.Input.Keyboard.JustDown(boutonTir)){
             if(attack==true){
@@ -323,16 +384,19 @@ function update ()
         player.destroy()
         hp.destroy()
     }
-    
+
+   scoreText.setText(movment); 
    
 }
 function getDamage (player, ours)
 {  
     if (!invincible)
+    {
     health-- 
     invincible = true;
     tempsInvincible = this.time.addEvent({ delay: 2000, callback: function(){invincible = false;}, callbackScope: this});
     }
+}
 
 function getGun (player, gun)
 {   
@@ -351,35 +415,6 @@ function shot(player){
     bullet.setVelocity(500 * coefDir, 0); // vitesse en x et en y
 }
 
-
-function collectStar (player, star)
-{
-    star.disableBody(true, true);
-
-    //  Add and update the score
-    score += 10;
-    scoreText.setText('Score: ' + score);
-
-    if (stars.countActive(true) === 0)
-    {
-        //  A new batch of stars to collect
-        stars.children.iterate(function (child) {
-
-            child.enableBody(true, child.x, 0, true, true);
-
-        });
-
-        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-        var bomb = bombs.create(x, 16, 'bomb');
-        bomb.setBounce(1);
-        bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-        bomb.allowGravity = false;
-
-    }
-}
-
 function hitBomb (player, bomb)
 {
     this.physics.pause();
@@ -391,6 +426,25 @@ function hitBomb (player, bomb)
     gameOver = true;
 }
 
+function getDead (player, peak)
+{
+    health= 0
+}
+
+function getSnowy (player, snowPlatforms)
+{
+    movment = 1;
+}
+
+function getIcy (player, icePlatforms)
+{
+    movment =2;
+}
+
+function getGround (player, platforms)
+{
+    movment=0;
+}
 </script>
 
 </body>
