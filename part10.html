@@ -201,11 +201,15 @@ function create ()
 
     bombs = this.physics.add.group();
 
+    //implémentation des panneaux
+    this.add.image (165,3100'board');
+
+    //utilisation du pistolet à neige
     gun = this.physics.add.group({
         key: 'gun',
         repeat: 0,
         setXY: {x:170,y:3100}
-    });
+    });tempsInvulerable = this.time.addEvent({ delay: 2000, callback: function(){invulnerable = false;}, callbackScope: this});tempsInvulerable = this.time.addEvent({ delay: 2000, callback: function(){invulnerable = false;}, callbackScope: this});
        
     //jauge de vie
     hp = this.add.image(1150,50,'flag3').setScrollFactor(0);
@@ -387,7 +391,6 @@ function hitBomb (player, bomb)
     gameOver = true;
 }
 
-// Trouver le moyen d'ajouter une fonction qui provoque le game Over
 </script>
 
 </body>
