@@ -291,8 +291,8 @@ function update ()
         }
     else if (cursors.up.isUp && !player.body.touching.down && player.direction == 'right' && player.body.blocked.right)
         {
-            player.setVelocityY(380);
-            player.setVelocityX(160);
+            player.setVelocityY(-380);
+            player.setVelocityX(-160);
             var wallTime=50;
             player.anims.play('wallJump_right');
         }
@@ -370,14 +370,17 @@ function update ()
         {
             if(player.body.velocity.x < 0){
                 player.setAccelerationX(100);
-                player.anims.play('left');
-                player.direction='left';
+                player.direction=='left';
+                player.anims.play('turn');
+                
+
             }
 
             else if(player.body.velocity.x > 0) {
                 player.setAccelerationX(-100);
-                player.anims.play('right');
-                player.direction='right';
+                player.direction=='right';
+                player.anims.play('turn');
+                
             }
 
             else {
